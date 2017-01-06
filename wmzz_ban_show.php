@@ -16,10 +16,9 @@ if (SYSTEM_PAGE == 'add') {
 	} else {
 		msg('请输入截止日期');
 	}
-	foreach ($_POST['user'] as $value) {
-		$value = addslashes(strip_tags($value));
-		$m->query("INSERT INTO `".DB_PREFIX."wmzz_ban` (`uid`, `pid`, `tieba`, `user`, `date`) VALUES ('".UID."', '{$pid}', '{$tieba}', '{$value}', '{$date}')");
-	}
+	$value = addslashes(strip_tags($_POST['user']));
+	$tpid = $_POST['tpid'];
+	$m->query("INSERT INTO `".DB_PREFIX."wmzz_ban` (`uid`, `pid`, `tieba`, `user`, `tpid` , `date`) VALUES ('".UID."', '{$pid}', '{$tieba}', '{$value}', '{$tpid}', '{$date}')");
 	ReDirect(SYSTEM_URL . 'index.php?plugin=wmzz_ban&ok');
 } elseif (SYSTEM_PAGE == 'del') {
 	$id = isset($_GET['id']) ? intval($_GET['id']) : msg('缺少ID');

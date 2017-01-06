@@ -9,8 +9,9 @@
 		<tr>
 			<th>ID</th>
 			<th>PID</th>
-			<th style="width:30%">所在贴吧</th>
-			<th style="width:30%">被封禁人名字</th>
+			<th style="width:20%">所在贴吧</th>
+			<th style="width:20%">被封禁人名字</th>
+			<th style="width:20%">TPID</th>
 			<th style="width:25%">截止日期</th>
 			<th style="width:25%">下次封禁</th>
 			<th></th>
@@ -26,6 +27,7 @@
 			<td><?php echo $v['pid'] ?></td>
 			<td><?php echo $v['tieba'] ?></td>
 			<td><?php echo $v['user'] ?></td>
+			<td><?php echo $v['tpid'] ?></td>
 			<td>
 			<?php if ($v['date'] == '0') {
 				echo '永久';
@@ -58,19 +60,24 @@
       	<br/>
       	<div class="input-group">
 			<span class="input-group-addon">选择封禁发起人账号ID [PID]</span>
-     	    <select name="pid" class="form-control"><?php foreach ($i['user']['bduss'] as $keyyy => $valueee) {echo '<option value="'.$keyyy.'">'.$keyyy.'</option>';} ?></select>
+     	    <select name="pid" class="form-control" id="pid"><?php foreach ($i['user']['bduss'] as $keyyy => $valueee) {echo '<option value="'.$keyyy.'">'.$keyyy.'</option>';} ?></select>
       	</div>
       	<br/>
       	<div class="input-group">
 			<span class="input-group-addon">要操作的贴吧名称</span>
-     	   	<input type="text" name="tieba" class="form-control">
+     	   	<input type="text" name="tieba" class="form-control" id="tieba">
       	</div>
       	<br/>
       	<div id="banlist">
       	<div class="input-group">
 			<span class="input-group-addon">被封禁人百度名字</span>
-     	   	<input type="text" name="user[]" class="form-control">
+     	   	<input type="text" name="user" class="form-control" id="user">
       	</div>
+      	</div>
+      	<br/>
+      	<div class="input-group">
+			<span class="input-group-addon">贴内ID</span>
+     	   	<input type="text" name="tpid" class="form-control">
       	</div>
       	<br/>
       	<div class="input-group">

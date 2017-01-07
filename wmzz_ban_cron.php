@@ -21,13 +21,15 @@ function cron_wmzz_ban() {
 			$c->addcookie('BDUSS='.$bduss);
 			$option = array(
 				'user_name[]' => $x['user'],
-				'pid[]'  => $x['tpid'],
 				'day' => $r,
 				'fid' => misc::getFid($x['tieba']),
 				'tbs' => misc::getTbs($x['uid'] , $bduss),
 				'ie' => 'utf-8',
 				'reason' => $s['msg']
 			);
+			if(!empty($x['tpid'])){
+				$option['pid[]']  => $x['tpid'];
+			}
 			$res = $c->post($option);
 			$res = json_decode($res,TRUE);
 			if($res['errno'] == 0){

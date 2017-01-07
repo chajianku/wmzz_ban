@@ -28,7 +28,7 @@ function cron_wmzz_ban() {
 				'reason' => $s['msg']
 			);
 			if(!empty($x['tpid'])){
-				$option['pid[]']  => $x['tpid'];
+				$option['pid[]']  = $x['tpid'];
 			}
 			$res = $c->post($option);
 			$res = json_decode($res,TRUE);

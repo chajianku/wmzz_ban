@@ -19,16 +19,25 @@ function cron_wmzz_ban() {
 			$bduss = misc::getCookie($x['pid']);
 			$c = new wcurl('http://tieba.baidu.com/pmc/blockid');
 			$c->addcookie('BDUSS='.$bduss);
-			$c->post(array(
+			$option = array(
 				'user_name[]' => $x['user'],
 				'day' => $r,
 				'fid' => misc::getFid($x['tieba']),
 				'tbs' => misc::getTbs($x['uid'] , $bduss),
 				'ie' => 'utf-8',
 				'reason' => $s['msg']
-			));
-			$next = $now + ( $r * 86400 );
-			$m->query("UPDATE `".DB_PREFIX."wmzz_ban` SET `nextdo` = '{$next}' WHERE `id` = '{$x['id']}'");
+			);
+			if(!empty($x['tpid'])){
+				$option['pid[]']  = $x['tpid'];
+			}
+			$res = $c->post($option);
+			$res = json_decode($res,TRUE);
+			if($res['errno'] == 0){
+				$next = $now + ( $r * 86400 );
+				$m->query("UPDATE `".DB_PREFIX."wmzz_ban` SET `nextdo` = '{$next}' WHERE `id` = '{$x['id']}'");
+			} else if( $res['errno'] == 74 ){    //用户名不存在   224011 需要验证码
+				$m->query("DELETE FROM `".DB_PREFIX."wmzz_ban` WHERE `id` = '{$x['id']}'");
+			}
 		} else {
 			$m->query("DELETE FROM `".DB_PREFIX."wmzz_ban` WHERE `id` = '{$x['id']}'");
 		}

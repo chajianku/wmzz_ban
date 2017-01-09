@@ -9,8 +9,9 @@
 		<tr>
 			<th>ID</th>
 			<th>PID</th>
-			<th style="width:30%">所在贴吧</th>
-			<th style="width:30%">被封禁人名字</th>
+			<th style="width:20%">所在贴吧</th>
+			<th style="width:20%">被封禁人名字</th>
+			<th style="width:20%">TPID</th>
 			<th style="width:25%">截止日期</th>
 			<th style="width:25%">下次封禁</th>
 			<th></th>
@@ -26,6 +27,7 @@
 			<td><?php echo $v['pid'] ?></td>
 			<td><?php echo $v['tieba'] ?></td>
 			<td><?php echo $v['user'] ?></td>
+			<td><?php echo $v['tpid'] ?></td>
 			<td>
 			<?php if ($v['date'] == '0') {
 				echo '永久';
@@ -58,19 +60,26 @@
       	<br/>
       	<div class="input-group">
 			<span class="input-group-addon">选择封禁发起人账号ID [PID]</span>
-     	    <select name="pid" class="form-control"><?php foreach ($i['user']['bduss'] as $keyyy => $valueee) {echo '<option value="'.$keyyy.'">'.$keyyy.'</option>';} ?></select>
+     	    <select name="pid" class="form-control" id="pid"><?php foreach ($i['user']['bduss'] as $keyyy => $valueee) {echo '<option value="'.$keyyy.'">'.$keyyy.'</option>';} ?></select>
       	</div>
       	<br/>
       	<div class="input-group">
 			<span class="input-group-addon">要操作的贴吧名称</span>
-     	   	<input type="text" name="tieba" class="form-control">
+     	   	<input type="text" name="tieba" class="form-control" id="tieba">
       	</div>
       	<br/>
       	<div id="banlist">
       	<div class="input-group">
 			<span class="input-group-addon">被封禁人百度名字</span>
-     	   	<input type="text" name="user[]" class="form-control">
+     	   	<input type="text" name="user" class="form-control" id="user">
       	</div>
+      	</div>
+      	<br/>
+      	<div class="input-group">
+			<span class="input-group-addon">贴内ID</span>
+			<span class="input-group-addon pidstatus">待获取</span>
+     	   	<input id="tpid" type="text" name="tpid" class="form-control">
+     	   	<span class="input-group-addon getpid" onclick="javascript:getPid();">自动获取</span>
       	</div>
       	<br/>
       	<div class="input-group">
@@ -89,3 +98,25 @@
 </div><!-- /.modal -->
 <br/><br/>管理员设置的循环封禁理由：<?php echo $s['msg'] ?>
 <br/><br/>作者：<a href="http://zhizhe8.net" target="_blank">无名智者</a>
+<script type="text/javascript">
+	function getPid(){
+		var user = $("#user").val()
+		var tieba = $("#tieba").val()
+		var pid = $("#pid").val();
+		$.ajax({
+			url:'/index.php?plugin=wmzz_ban&mod=getpid&pid='+pid+'&user='+user+'&tieba='+tieba+'&t_='+ Date.parse(new Date()),
+			type:'post',
+			dataType:'json',
+			success:function(data){
+				if(data.status == 'ok'){
+					$(".pidstatus").html('自动获取成功')
+					$(".pidstatus").css("color","#00CD66")
+					$("#tpid").val(data.pid)
+					return
+				}
+				$(".pidstatus").html('自动获取失败')
+				$(".pidstatus").css("color","#CD2626")
+			}
+		})
+	}
+</script>

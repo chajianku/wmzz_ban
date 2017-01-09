@@ -9,6 +9,7 @@ function callback_init() {
 `pid`  int(255) NOT NULL ,
 `tieba`  varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL ,
 `user`  varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL ,
+`tpid`  varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL ,
 `date`  varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '0' ,
 `nextdo`  varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '0' ,
 PRIMARY KEY (`id`)

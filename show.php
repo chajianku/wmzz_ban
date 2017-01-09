@@ -77,7 +77,9 @@
       	<br/>
       	<div class="input-group">
 			<span class="input-group-addon">贴内ID</span>
-     	   	<input type="text" name="tpid" class="form-control">
+			<span class="input-group-addon pidstatus">待获取</span>
+     	   	<input id="tpid" type="text" name="tpid" class="form-control">
+     	   	<span class="input-group-addon getpid" onclick="javascript:getPid();">自动获取</span>
       	</div>
       	<br/>
       	<div class="input-group">
@@ -96,3 +98,25 @@
 </div><!-- /.modal -->
 <br/><br/>管理员设置的循环封禁理由：<?php echo $s['msg'] ?>
 <br/><br/>作者：<a href="http://zhizhe8.net" target="_blank">无名智者</a>
+<script type="text/javascript">
+	function getPid(){
+		var user = $("#user").val()
+		var tieba = $("#tieba").val()
+		var pid = $("#pid").val();
+		$.ajax({
+			url:'/index.php?plugin=wmzz_ban&mod=getpid&pid='+pid+'&user='+user+'&tieba='+tieba+'&t_='+ Date.parse(new Date()),
+			type:'post',
+			dataType:'json',
+			success:function(data){
+				if(data.status == 'ok'){
+					$(".pidstatus").html('自动获取成功')
+					$(".pidstatus").css("color","#00CD66")
+					$("#tpid").val(data.pid)
+					return
+				}
+				$(".pidstatus").html('自动获取失败')
+				$(".pidstatus").css("color","#CD2626")
+			}
+		})
+	}
+</script>

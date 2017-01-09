@@ -24,7 +24,42 @@ if (SYSTEM_PAGE == 'add') {
 	$id = isset($_GET['id']) ? intval($_GET['id']) : msg('缺少ID');
 	$m->query("DELETE FROM `".DB_PREFIX."wmzz_ban` WHERE `uid` = ".UID." AND `id` = ".$id);
 	ReDirect(SYSTEM_URL . 'index.php?plugin=wmzz_ban&ok');
-} else {
+} elseif(SYSTEM_PAGE == 'getpid'){
+	$username = $_GET['user'];
+	$tieba = $_GET['tieba'];
+	$pid = $_GET['pid'];
+	$option = array(
+		'word' => mb_convert_encoding($tieba,'gbk','UTF-8'),
+		'op_type' => '',
+		'stype' => 'post_uname',
+		'svalue' =>  mb_convert_encoding($username,'gbk','UTF-8'),
+		'date_type' => 'on',
+		'startTime' => '',
+		'begin' => '',
+		'endTime' => '',
+		'end' => ''
+	);
+	$bduss = misc::getCookie($pid);
+	$query = http_build_query($option);
+	$c = new wcurl('http://tieba.baidu.com/bawu2/platform/listPostLog?'. $query);
+	$c->addcookie('BDUSS='.$bduss);
+	$html = $c->get();
+	$html = mb_convert_encoding($html,'UTF-8','gbk');
+	$preg ="/<article class=\"post_wrapper clearfix\"><div class=\"post_meta\"><div class=\"post_author\">.*?<h1><a target=\"_blank\" href=\".*?pid=(.*?)\".*?<\/article>/i";
+	preg_match_all($preg, $html, $info);
+	$pid = [];
+	foreach ($info[1] as $value) {
+		$pidarray = explode('#',$value);
+		$pid[] = (float)$pidarray[1];
+		$pid[] = (float)$pidarray[0];
+	}
+	$maxpid =  max($pid);
+	if($maxpid > 100000000000){
+		echo json_encode(array('status' => 'ok','pid'=>$maxpid));
+		return;
+	}
+	echo json_encode(array('status' => 'error'));
+}else {
 	loadhead();
 	require SYSTEM_ROOT.'/plugins/wmzz_ban/show.php';
 	loadfoot(); 

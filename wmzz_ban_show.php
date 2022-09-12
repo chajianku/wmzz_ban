@@ -36,7 +36,11 @@ if (SYSTEM_PAGE == 'add') {
                 $portrait_i = explode($suffix2, $portrait_i)[0];
             }
 //            if(strlen($portrait_i)=="")
-            $m->query("INSERT INTO `" . DB_PREFIX . "wmzz_ban` (`uid`, `pid`, `tieba`, `portrait` , `date`) VALUES ('" . UID . "', '{$pid}', '{$tieba}', '{$portrait_i}', '{$date}')");
+            $m->query("INSERT INTO `" . DB_PREFIX . "wmzz_ban` (`uid`, `pid`, `tieba`, `portrait` , `date`)"
+                . " SELECT '" . UID . "', '{$pid}', '{$tieba}', '{$portrait_i}', '{$date}'"
+                . " WHERE NOT EXISTS ( SELECT * FROM `" . DB_PREFIX . "wmzz_ban`"
+                . " WHERE `uid` = '" . UID . "' AND `pid` = '{$pid}' AND `tieba` = '{$tieba}'"
+                . " AND `portrait` = '{$portrait_i}' AND `date` = '{$date}')");
         }
     }
     ReDirect(SYSTEM_URL . 'index.php?plugin=wmzz_ban&ok');

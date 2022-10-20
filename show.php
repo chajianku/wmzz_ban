@@ -60,7 +60,7 @@ $pid_checked = array_key_exists($pid, $i['user']['bduss']) ? $pid : '';
                 } else if (names[i].id.trim() === "portrait") {
                     document.getElementById(prefix + names[i].id.trim()).innerText = args[i].innerText.trim();
                 } else if (names[i].id.trim() === "pid") {
-                    let pid_html;
+                    let pid_html = "";
                     if (pid_array.includes(args[i].innerHTML.trim())) {
                         document.getElementById(prefix + "pid_info").innerHTML = "选择封禁发起人账号ID [PID]";
                         pid_html = "<option value=\"" + args[i].innerHTML.trim() + "\" selected hidden>" + args[i].innerHTML.trim() + "</option>";
@@ -98,71 +98,22 @@ $pid_checked = array_key_exists($pid, $i['user']['bduss']) ? $pid : '';
 
 <h2>贴吧循环封禁</h2>
 
+<br/>
 
 <!-- NAVI -->
 <ul class="nav nav-tabs" id="PageTab">
-    <li class="active"><a href="#page_config" data-toggle="tab"
-                          onclick="$('#page_list').css('display','none');$('#page_config').css('display','');">插件配置</a>
+    <li class="active"><a href="#page_list" data-toggle="tab"
+                          onclick="$('#page_list').css('display','');$('#page_config').css('display','none');">封禁列表</a>
     </li>
-    <li><a href="#page_list" data-toggle="tab"
-           onclick="$('#page_list').css('display','');$('#page_config').css('display','none');">封禁列表</a>
+    <li><a href="#page_config" data-toggle="tab"
+           onclick="$('#page_list').css('display','none');$('#page_config').css('display','');">插件配置</a>
     </li>
 </ul>
 <br>
 <!-- END NAVI -->
 
-<!-- PAGE1: page_config-->
-<div class="tab-pane fade in active" id="page_config">
-    <a name="#page_config"></a>
-    <form action="index.php?plugin=wmzz_ban&mod=store" method="post">
-        <table class="table table-striped">
-            以下为循环封禁设置
-            <br/>
-            <br/>
-            <b>先保存设定，再增加封禁</b>
-            <br/><br/>
-            <tr>
-                <td>添加封禁时默认的封禁原因</td>
-                <td><input type="text"
-                           value="<?php echo $msg ?>"
-                           name="msg" class="form-control">
-                </td>
-            </tr>
-            <tr>
-                <td>添加封禁时默认选择的贴吧</td>
-                <td><input type="text"
-                           value="<?php echo $tieba ?>"
-                           name="tieba" class="form-control"></td>
-            </tr>
-            <tr>
-                <td>添加封禁时默认执行封禁的id</td>
-                <td><select name="pid" class="form-control" id="pid">
-                        <option value=""></option><?php
-                        if (array_key_exists($pid, $i['user']['bduss'])) {
-                            echo '<option disabled hidden value=""></option>';
-                            foreach ($i['user']['bduss'] as $keyyy => $valueee) {
-                                if ($keyyy == $pid) {
-                                    echo '<option selected value="' . $keyyy . '">' . $keyyy . '</option>';
-                                } else {
-                                    echo '<option value="' . $keyyy . '">' . $keyyy . '</option>';
-                                }
-                            }
-                        } else {
-                            echo '<option selected disabled hidden value=""></option>';
-                            foreach ($i['user']['bduss'] as $keyyy => $valueee) {
-                                echo '<option value="' . $keyyy . '">' . $keyyy . '</option>';
-                            }
-                        } ?></select></td>
-            </tr>
-        </table>
-        <input type="hidden" name="anchor" id="anchor" value="page_config"/>
-        <button type="submit" class="btn btn-success">保存设定</button>
-    </form>
-</div>
-<!-- END PAGE1 -->
-
-<!-- PAGE2: page_list -->
-<div class="tab-pane fade" id="page_list" style="display:none">
+<!-- PAGE1: page_list-->
+<div class="tab-pane fade in active" id="page_list">
     <a name="#page_list"></a>
 
     <input type="button" data-toggle="modal" data-target="#banuser"
@@ -224,6 +175,57 @@ $pid_checked = array_key_exists($pid, $i['user']['bduss']) ? $pid : '';
         </tbody>
     </table>
 
+</div>
+
+<!-- END PAGE1 -->
+
+<!-- PAGE2: page_config -->
+<div class="tab-pane fade" id="page_config" style="display:none">
+    <a name="#page_config"></a>
+    <form action="index.php?plugin=wmzz_ban&mod=store" method="post">
+        <table class="table table-striped">
+            以下为循环封禁设置
+            <br/>
+            <br/>
+            <b>先保存设定，再增加封禁</b>
+            <br/><br/>
+            <tr>
+                <td>添加封禁时默认的封禁原因</td>
+                <td><input type="text"
+                           value="<?php echo $msg ?>"
+                           name="msg" class="form-control">
+                </td>
+            </tr>
+            <tr>
+                <td>添加封禁时默认选择的贴吧</td>
+                <td><input type="text"
+                           value="<?php echo $tieba ?>"
+                           name="tieba" class="form-control"></td>
+            </tr>
+            <tr>
+                <td>添加封禁时默认执行封禁的id</td>
+                <td><select name="pid" class="form-control" id="pid">
+                        <option value=""></option><?php
+                        if (array_key_exists($pid, $i['user']['bduss'])) {
+                            echo '<option disabled hidden value=""></option>';
+                            foreach ($i['user']['bduss'] as $keyyy => $valueee) {
+                                if ($keyyy == $pid) {
+                                    echo '<option selected value="' . $keyyy . '">' . $keyyy . '</option>';
+                                } else {
+                                    echo '<option value="' . $keyyy . '">' . $keyyy . '</option>';
+                                }
+                            }
+                        } else {
+                            echo '<option selected disabled hidden value=""></option>';
+                            foreach ($i['user']['bduss'] as $keyyy => $valueee) {
+                                echo '<option value="' . $keyyy . '">' . $keyyy . '</option>';
+                            }
+                        } ?></select></td>
+            </tr>
+        </table>
+        <input type="hidden" name="anchor" id="anchor" value="page_config"/>
+        <button type="submit" class="btn btn-success">保存设定</button>
+    </form>
 </div>
 
 <!-- END PAGE2 -->

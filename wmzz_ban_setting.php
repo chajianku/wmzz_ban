@@ -2,7 +2,10 @@
 if (!defined('SYSTEM_ROOT')) {
     die('Insufficient Permissions');
 }
-
+if (ROLE !== 'admin') {
+    msg('权限不足!');
+    die;
+}
 global $i, $m;
 
 $s = unserialize(option::get('plugin_wmzz_ban'));

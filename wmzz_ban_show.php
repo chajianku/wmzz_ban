@@ -179,26 +179,27 @@ if (SYSTEM_PAGE == 'store') {
     } else {
         msg('请输入正确数量的被封禁人portrait');
     }
-    if (isset($_POST['date'])) {
-        if ($_POST['date'] == "0") {
-            $date = "0";
+    if ($_POST['date'] == '0') {
+        $date = '0';
+    } else {
+        if (empty($_POST['date'])) {
+            $date = '';
         } else {
             $date = strtotime($_POST['date']);
         }
-    } else {
-        $date = "";
     }
-    if (isset($_POST['date2'])) {
-        if ($_POST['date2'] == "0") {
-            $date2 = "0";
+    if ($_POST['date2'] == '0') {
+        $date2 = '0';
+    } else {
+        if (empty($_POST['date2'])) {
+            $date2 = '';
         } else {
             $date2 = strtotime($_POST['date2']);
         }
-    } else {
-        $date2 = "";
     }
-    if ((empty($date) && !empty($date2)) || (!empty($date) && empty($date2))) {
-        msg('请正确输入截止日期');
+    if (((empty($date) && $date != '0') && (!empty($date2) || $date2 = '0'))
+        || ((!empty($date) || $date == '0') && (empty($date2) && $date2 != '0'))) {
+        msg('请正确输入每次封禁天数');
     }
 
     $status = false;
@@ -238,14 +239,25 @@ if (SYSTEM_PAGE == 'store') {
         $status = true;
     }
     if (!empty($nextdo) && !empty($nextdo2)) {
-        $nextdo=strtotime($nextdo);
-        $nextdo2=strtotime($nextdo2);
+        $nextdo = strtotime($nextdo);
+        $nextdo2 = strtotime($nextdo2);
         if ($status) {
             $sql1 .= ", `nextdo` = '{$nextdo2}'";
             $sql2 .= " AND `nextdo` = '{$nextdo}'";
         } else {
             $sql1 .= "`nextdo` = '{$nextdo2}'";
             $sql2 .= "`nextdo` = '{$nextdo}'";
+        }
+        $status = true;
+    }
+    if ((!empty($date) || $date == '0')
+        && (!empty($date2) || $date2 == '0')) {
+        if ($status) {
+            $sql1 .= ", `date` = '{$date2}'";
+            $sql2 .= " AND `date` = '{$date}'";
+        } else {
+            $sql1 .= "`date` = '{$date2}'";
+            $sql2 .= "`date` = '{$date}'";
         }
         $status = true;
     }
@@ -259,17 +271,6 @@ if (SYSTEM_PAGE == 'store') {
         }
         $status = true;
     }
-    if (!empty($date) && !empty($date2)) {
-        if ($status) {
-            $sql1 .= ", `date` = '{$date2}'";
-            $sql2 .= " AND `date` = '{$date}'";
-        } else {
-            $sql1 .= "`date` = '{$date2}'";
-            $sql2 .= "`date` = '{$date}'";
-        }
-        $status = true;
-    }
-
     $prefix = "id=tb.";
     $suffix1 = "&";
     $suffix2 = "?";

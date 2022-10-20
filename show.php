@@ -9,8 +9,15 @@ if (isset($_GET['ok'])) {
 
 $msg = array_key_exists('value', $user_options['msg']) ? $user_options['msg']['value'] : '';
 $tieba = array_key_exists('value', $user_options['tieba']) ? $user_options['tieba']['value'] : '';
+$day = array_key_exists('value', $user_options['day']) ? $user_options['day']['value'] : '';
 $pid = array_key_exists('value', $user_options['pid']) ? $user_options['pid']['value'] : '';
 $pid_checked = array_key_exists($pid, $i['user']['bduss']) ? $pid : '';
+
+$day_list = [
+    '1',
+    '3',
+    '10',
+];
 ?>
 
 <script type="text/javascript">
@@ -38,6 +45,13 @@ $pid_checked = array_key_exists($pid, $i['user']['bduss']) ? $pid : '';
         document.getElementById(prefix + "msg").setAttribute("value", "<?php echo $msg;  ?>");
         document.getElementById(prefix + "portrait").innerHTML = "";
         document.getElementById(prefix + "date").setAttribute("value", "0");
+        document.getElementById(prefix + "day").innerHTML =<?php
+        echo '"<option value=\"' . $day . '\" selected hidden>' . $day . '</option>'; ?>
+        <?php foreach ($day_list as $day_i) {
+            echo '<option value=\"' . $day_i . '\">' . $day_i . '</option>';
+        }
+        echo "\"";
+        ?>;
     }
 
     function edit_values(id) {
@@ -59,6 +73,17 @@ $pid_checked = array_key_exists($pid, $i['user']['bduss']) ? $pid : '';
                     document.getElementById(prefix + names[i].id.trim()).setAttribute("value", "0");
                 } else if (names[i].id.trim() === "portrait") {
                     document.getElementById(prefix + names[i].id.trim()).innerText = args[i].innerText.trim();
+                } else if (names[i].id.trim() === "day") {
+                    let day_html = "";
+                    day_html += "<option selected hidden value=\"<?php
+                        echo $day . '\\">' . $day;
+                        ?></option>";
+                    <?php
+                    foreach ($day_list as $day_i) {
+                        echo 'day_html += "<option value=\"' . $day_i . '\">' . $day_i . '</option>";';
+                    }
+                    ?>
+                    document.getElementById(prefix + names[i].id.trim()).innerHTML = day_html;
                 } else if (names[i].id.trim() === "pid") {
                     let pid_html = "";
                     if (pid_array.includes(args[i].innerHTML.trim())) {
@@ -92,6 +117,15 @@ $pid_checked = array_key_exists($pid, $i['user']['bduss']) ? $pid : '';
         ?>
         document.getElementById(prefix + "pid_list").innerHTML = pid_html;
         document.getElementById(prefix + "pid2").innerHTML = pid_html;
+
+        let day_html = "<option value=\"" + "\" selected hidden>" + "</option>";
+        <?php
+        foreach ($day_list as $day_i) {
+            echo 'day_html += "<option value=\"' . $day_i . '\">' . $day_i . '</option>";';
+        }
+        ?>
+        document.getElementById(prefix + "day_list").innerHTML = day_html;
+        document.getElementById(prefix + "day2").innerHTML = day_html;
 
     }
 </script>
@@ -132,11 +166,13 @@ $pid_checked = array_key_exists($pid, $i['user']['bduss']) ? $pid : '';
         <tr>
             <th id="id">ID</th>
             <th id="pid">PID</th>
-            <th id="tieba" style="width:20%">所在贴吧</th>
-            <th id="portrait" style="width:20%">被封禁人portrait</th>
-            <th id="msg" style="width:20%">封禁原因</th>
-            <th id="date" style="width:20%">截止日期</th>
-            <th id="nextdo" style="width:20%">下次封禁</th>
+            <th id="tieba">贴吧</th>
+            <th id="portrait">被封禁人portrait</th>
+            <th id="msg">封禁原因</th>
+            <th id="date">截止日期</th>
+            <th id="nextdo">下次封禁</th>
+            <th id="day"
+            ">每次封禁天数</th>
             <th id="edituser_button">修改</th>
             <th id="deluser_button">删除</th>
         </tr>
@@ -161,12 +197,14 @@ $pid_checked = array_key_exists($pid, $i['user']['bduss']) ? $pid : '';
                         echo date('Y-m-d', $v['date']);
                     }
                     ?></td>
-                <td><?php if (empty($v['nextdo'])) echo '即将';
-                    else echo date('Y-m-d', $v['nextdo']); ?><br/><a
-                            href="javascript:scroll(0,0)">返回顶部</a></td>
+                <td id="use"><?php if (empty($v['nextdo'])) echo '即将';
+                    else echo date('Y-m-d', $v['nextdo']); ?></td>
+                <td id="use"><?php echo $v['day']; ?>
+                </td>
                 <td><a class="btn btn-default" data-toggle="modal" data-target="#edituser"
                        onclick="edit_values('baneduser<?php echo $v['id'] ?>')"
-                       title="修改"><span class="glyphicon glyphicon-edit"></span> </a></td>
+                       title="修改"><span class="glyphicon glyphicon-edit"></span> </a>
+                    <br/><br/><a href="javascript:scroll(0,0)">返回顶部</a></td>
                 <td><a class="btn btn-default"
                        href="index.php?plugin=wmzz_ban&mod=del&id=<?php echo $v['id'] ?>"
                        title="删除"><span class="glyphicon glyphicon-remove"></span> </a></td>
@@ -197,30 +235,38 @@ $pid_checked = array_key_exists($pid, $i['user']['bduss']) ? $pid : '';
                 </td>
             </tr>
             <tr>
+                <td>添加封禁时默认执行封禁的id</td>
+                <td><select name="pid" class="form-control" id="pid">
+                        <option value=""></option><?php
+                        echo '<option value=""></option>';
+                        foreach ($i['user']['bduss'] as $keyyy => $valueee) {
+                            if ($keyyy == $pid) {
+                                echo '<option selected value="' . $keyyy . '">' . $keyyy . '</option>';
+                            } else {
+                                echo '<option value="' . $keyyy . '">' . $keyyy . '</option>';
+                            }
+                        } ?></select></td>
+            </tr>
+            <tr>
                 <td>添加封禁时默认选择的贴吧</td>
                 <td><input type="text"
                            value="<?php echo $tieba ?>"
                            name="tieba" class="form-control"></td>
             </tr>
             <tr>
-                <td>添加封禁时默认执行封禁的id</td>
-                <td><select name="pid" class="form-control" id="pid">
-                        <option value=""></option><?php
-                        if (array_key_exists($pid, $i['user']['bduss'])) {
-                            echo '<option disabled hidden value=""></option>';
-                            foreach ($i['user']['bduss'] as $keyyy => $valueee) {
-                                if ($keyyy == $pid) {
-                                    echo '<option selected value="' . $keyyy . '">' . $keyyy . '</option>';
-                                } else {
-                                    echo '<option value="' . $keyyy . '">' . $keyyy . '</option>';
-                                }
+                <td>添加封禁时默认选择的每次封禁天数</td>
+                <td>
+                    <select name="day" class="form-control" id="day">
+                        <?php
+                        foreach ($day_list as $day_i) {
+                            if ($day == $day_i) {
+                                echo '<option value="' . $day_i . '" selected>' . $day_i . '</option>';
+                            } else {
+                                echo '<option value="' . $day_i . '">' . $day_i . '</option>';
                             }
-                        } else {
-                            echo '<option selected disabled hidden value=""></option>';
-                            foreach ($i['user']['bduss'] as $keyyy => $valueee) {
-                                echo '<option value="' . $keyyy . '">' . $keyyy . '</option>';
-                            }
-                        } ?></select></td>
+                        }
+                        ?>
+                    </select></td>
             </tr>
         </table>
         <input type="hidden" name="anchor" id="anchor" value="page_config"/>
@@ -241,7 +287,7 @@ $pid_checked = array_key_exists($pid, $i['user']['bduss']) ? $pid : '';
             </div>
             <form id="banuser_form" action="index.php?plugin=wmzz_ban&mod=add" method="post">
                 <div class="modal-body">
-                    要操作的贴吧名称后面不要带 <b>吧</b><br/>封禁截止日期格式为 yyyy-mm-dd，<b>0</b>
+                    要操作的贴吧名称后面不要带 <b>吧</b><br/>封禁相关日期格式为 yyyy-mm-dd，<b>0</b>
                     表示永久封禁<br/>web端点开用户主页，url里的id参数就是portrait<br/>
                     <br/>
                     <div class="input-group">
@@ -267,7 +313,7 @@ $pid_checked = array_key_exists($pid, $i['user']['bduss']) ? $pid : '';
                         <div class="input-group">
                                             <span class="input-group-addon"
                                                   id="banuser_banlistspan">被封禁人portrait<br/><br/>1.可添加多个<br/><br/>用回车分隔<br/><br/>2.支持直接粘贴<br/><br/>用户主页的url<br/><br/>可以自动提取portrait</span>
-                            <textarea class="form-control" name="portrait" style="height:260px;"
+                            <textarea class="form-control" name="portrait" style="height:240px;"
                                       id="banuser_portrait"></textarea>
                             <!--                            <input type="text" name="portrait" class="form-control" id="banuser_portrait">-->
                         </div>
@@ -278,6 +324,12 @@ $pid_checked = array_key_exists($pid, $i['user']['bduss']) ? $pid : '';
                         <input type="text" name="date" id="banuser_date" class="form-control" value="0">
                     </div>
                     <br/>
+                    <div class="input-group">
+                        <span class="input-group-addon">每次封禁天数</span>
+                        <select name="day" id="banuser_day" class="form-control">
+
+                        </select>
+                    </div>
                 </div>
                 <input type="hidden" name="anchor" id="anchor" value="page_list"/>
                 <div class="modal-footer">
@@ -300,7 +352,7 @@ $pid_checked = array_key_exists($pid, $i['user']['bduss']) ? $pid : '';
             </div>
             <form id="edituser_form" action="index.php?plugin=wmzz_ban&mod=update" method="post">
                 <div class="modal-body">
-                    要操作的贴吧名称后面不要带 <b>吧</b><br/>封禁截止日期格式为 yyyy-mm-dd，<b>0</b>
+                    要操作的贴吧名称后面不要带 <b>吧</b><br/>封禁相关日期格式为 yyyy-mm-dd，<b>0</b>
                     表示永久封禁<br/>web端点开用户主页，url里的id参数就是portrait<br/>
                     <br/>
                     <div class="input-group">
@@ -331,9 +383,8 @@ $pid_checked = array_key_exists($pid, $i['user']['bduss']) ? $pid : '';
                         <div class="input-group">
                                             <span class="input-group-addon"
                                                   id="edituser_banlistspan">被封禁人portrait<br/><br/>1.支持直接粘贴<br/><br/>用户主页的url<br/><br/>可以自动提取portrait</span>
-                            <textarea class="form-control" name="portrait" style="height:200px;"
+                            <textarea class="form-control" name="portrait" style="height:140px;"
                                       id="edituser_portrait"></textarea>
-                            <!--                            <input type="text" name="portrait" class="form-control" id="edituser_portrait">-->
                         </div>
                     </div>
                     <br/>
@@ -343,6 +394,18 @@ $pid_checked = array_key_exists($pid, $i['user']['bduss']) ? $pid : '';
                                value="0">
                     </div>
                     <br/>
+                    <div class="input-group">
+                        <span class="input-group-addon">下次封禁日期</span>
+                        <input type="text" name="nextdo" id="edituser_nextdo" class="form-control"
+                               value="">
+                    </div>
+                    <br/>
+                    <div class="input-group">
+                        <span class="input-group-addon">每次封禁天数</span>
+                        <select name="day" id="edituser_day" class="form-control">
+
+                        </select>
+                    </div>
                 </div>
                 <input type="hidden" name="anchor" id="anchor" value="page_list"/>
                 <div class="modal-footer">
@@ -365,7 +428,7 @@ $pid_checked = array_key_exists($pid, $i['user']['bduss']) ? $pid : '';
             </div>
             <form id="batchedit_form" action="index.php?plugin=wmzz_ban&mod=batchedit" method="post">
                 <div class="modal-body">
-                    要操作的贴吧名称后面不要带 <b>吧</b><br/>封禁截止日期格式为 yyyy-mm-dd，<b>0</b>
+                    要操作的贴吧名称后面不要带 <b>吧</b><br/>封禁相关日期格式为 yyyy-mm-dd，<b>0</b>
                     表示永久封禁<br/>web端点开用户主页，url里的id参数就是portrait<br/>
                     <b>填了多个选项的情况下是判断条件都满足（条件和）</b>
                     <br/>
@@ -418,6 +481,25 @@ $pid_checked = array_key_exists($pid, $i['user']['bduss']) ? $pid : '';
                                value="">
                     </div>
                     <br/>
+                    <div class="input-group">
+                        <span class="input-group-addon">下次封禁日期</span>
+                        <input type="text" name="nextdo" id="batchedit_nextdo" class="form-control"
+                               value="">
+                        <input type="text" name="nextdo2" id="batchedit_nextdo2" class="form-control"
+                               value="">
+                    </div>
+                    <br/>
+                    <div class="input-group">
+                        <span class="input-group-addon">每次封禁天数</span>
+                        <input name="day" type="text" list="batchedit_day_list" class="form-control"
+                               id="batchedit_day" value="">
+                        <datalist id="batchedit_day_list">
+
+                        </datalist>
+                        <select name="day2" class="form-control" id="batchedit_day2">
+
+                        </select>
+                    </div>
                 </div>
                 <input type="hidden" name="anchor" id="anchor" value="page_list"/>
                 <div class="modal-footer">

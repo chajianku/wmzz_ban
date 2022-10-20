@@ -14,6 +14,7 @@ function callback_init()
         `portrait`  varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL ,
         `msg`  varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci,
         `date`  varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '0' ,
+        `day`  int(255) NOT NULL ,
         `nextdo`  varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '0' ,
         PRIMARY KEY (`id`)
         )
@@ -47,6 +48,8 @@ function callback_remove()
         . " WHERE `name` = 'wmzz_ban_tieba'");
     $m->query("DELETE FROM `" . DB_PREFIX . "users_options`"
         . " WHERE `name` = 'wmzz_ban_pid'");
+    $m->query("DELETE FROM `" . DB_PREFIX . "users_options`"
+        . " WHERE `name` = 'wmzz_ban_day'");
 }
 
 ?>

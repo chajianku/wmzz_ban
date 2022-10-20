@@ -26,33 +26,6 @@ if (isset($_GET['ok'])) {
             <td><input type="number" min="1" step="1" name="limit" value="<?php echo $s['limit'] ?>"
                        class="form-control" required></td>
         </tr>
-        <tr>
-            <td>被封禁提示语句</td>
-            <td><input type="text" value="<?php echo $s['msg'] ?>" name="msg" class="form-control" required></td>
-        </tr>
-        <tr>
-            <td>默认封禁的贴吧</td>
-            <td><input type="text" value="<?php echo $s['tieba'] ?>" name="tieba" class="form-control"></td>
-        </tr>
-        <tr>
-            <td>默认执行封禁的id</td>
-            <td><select name="pid" class="form-control" id="pid">
-                    <option value=""></option><?php if (empty($s["pid"])) {
-                        echo '<option selected disabled hidden value=""></option>';
-                        foreach ($i['user']['bduss'] as $keyyy => $valueee) {
-                            echo '<option value="' . $keyyy . '">' . $keyyy . '</option>';
-                        }
-                    } else {
-                        echo '<option disabled hidden value=""></option>';
-                        foreach ($i['user']['bduss'] as $keyyy => $valueee) {
-                            if ($keyyy == $s["pid"]) {
-                                echo '<option selected value="' . $keyyy . '">' . $keyyy . '</option>';
-                            } else {
-                                echo '<option value="' . $keyyy . '">' . $keyyy . '</option>';
-                            }
-                        }
-                    } ?></select></td>
-        </tr>
         </tbody>
     </table>
     <br/><br/>

@@ -7,11 +7,13 @@ if (SYSTEM_PAGE == 'store') {
     $pid = addslashes(strip_tags($_POST['pid']));
     $msg = addslashes(strip_tags($_POST['msg']));
     $tieba = addslashes(strip_tags($_POST['tieba']));
+    $day = addslashes(strip_tags($_POST['day']));
     $anchor = addslashes(strip_tags($_POST['anchor']));
     $user_options = [
         'pid' => $m->fetch_array($m->query("SELECT 1 FROM `" . DB_PREFIX . "users_options` WHERE `uid` = '" . UID . "' AND `name` = 'wmzz_ban_pid' LIMIT 1")),
         'msg' => $m->fetch_array($m->query("SELECT 1 FROM `" . DB_PREFIX . "users_options` WHERE `uid` = '" . UID . "' AND `name` = 'wmzz_ban_msg' LIMIT 1")),
         'tieba' => $m->fetch_array($m->query("SELECT 1 FROM `" . DB_PREFIX . "users_options` WHERE `uid` = '" . UID . "' AND `name` = 'wmzz_ban_tieba' LIMIT 1")),
+        'day' => $m->fetch_array($m->query("SELECT 1 FROM `" . DB_PREFIX . "users_options` WHERE `uid` = '" . UID . "' AND `name` = 'wmzz_ban_day' LIMIT 1")),
     ];
     if (empty($user_options['pid'])) {
         $m->query("INSERT INTO `" . DB_PREFIX . "users_options` (`uid`, `name` , `value`)"
@@ -34,6 +36,13 @@ if (SYSTEM_PAGE == 'store') {
         $m->query("UPDATE `" . DB_PREFIX . "users_options` SET `value` = '" . $tieba
             . "' WHERE `uid` = '" . UID . "' AND `name` = 'wmzz_ban_tieba'");
     }
+    if (empty($user_options['day'])) {
+        $m->query("INSERT INTO `" . DB_PREFIX . "users_options` (`uid`, `name` , `value`)"
+            . " values ('" . UID . "','wmzz_ban_day','" . $day . "')");
+    } else {
+        $m->query("UPDATE `" . DB_PREFIX . "users_options` SET `value` = '" . $day
+            . "' WHERE `uid` = '" . UID . "' AND `name` = 'wmzz_ban_day'");
+    }
     ReDirect(SYSTEM_URL . 'index.php?plugin=wmzz_ban&ok' . '#' . $anchor);
 } else if (SYSTEM_PAGE == 'add') {
     $pid = !empty($_POST['pid']) ? intval($_POST['pid']) : msg('请选择PID');
@@ -42,6 +51,7 @@ if (SYSTEM_PAGE == 'store') {
     }
     $tieba = !empty($_POST['tieba']) ? addslashes(strip_tags($_POST['tieba'])) : msg('请输入贴吧');
     $msg = !empty($_POST['msg']) ? addslashes(strip_tags($_POST['msg'])) : msg('请输入封禁原因');
+    $day = !empty($_POST['day']) ? addslashes(strip_tags($_POST['day'])) : msg('请输入每次封禁天数');
     $portrait = !empty($_POST['portrait']) ? addslashes(strip_tags($_POST['portrait'])) : msg('请输入被封禁人portrait');
     $portrait = explode("\n", trim($portrait));
     $anchor = addslashes(strip_tags($_POST['anchor']));
@@ -71,11 +81,11 @@ if (SYSTEM_PAGE == 'store') {
             }
 //            if(strlen($portrait_i)=="")
             $now = strtotime(date('Y-m-d'));
-            $m->query("INSERT INTO `" . DB_PREFIX . "wmzz_ban` (`uid`, `pid`, `tieba`, `portrait`, `msg` , `date`, `nextdo`)"
-                . " SELECT '" . UID . "', '{$pid}', '{$tieba}', '{$portrait_i}', '{$msg}', '{$date}', '{$now}'"
+            $m->query("INSERT INTO `" . DB_PREFIX . "wmzz_ban` (`uid`, `pid`, `tieba`, `portrait`, `msg` , `date`, `day` , `nextdo`)"
+                . " SELECT '" . UID . "', '{$pid}', '{$tieba}', '{$portrait_i}', '{$msg}', '{$date}', '{$day}', '{$now}'"
                 . " WHERE NOT EXISTS ( SELECT * FROM `" . DB_PREFIX . "wmzz_ban`"
                 . " WHERE `uid` = '" . UID . "' AND `pid` = '{$pid}' AND `tieba` = '{$tieba}'"
-                . " AND `portrait` = '{$portrait_i}' AND `msg` = '{$msg}' AND `date` = '{$date}')");
+                . " AND `portrait` = '{$portrait_i}' AND `msg` = '{$msg}' AND `date` = '{$date}' AND `day` = '{$day}')");
         }
     }
     ReDirect(SYSTEM_URL . 'index.php?plugin=wmzz_ban&ok' . '#' . $anchor);
@@ -87,6 +97,10 @@ if (SYSTEM_PAGE == 'store') {
     }
     $tieba = !empty($_POST['tieba']) ? addslashes(strip_tags($_POST['tieba'])) : msg('请输入贴吧');
     $msg = !empty($_POST['msg']) ? addslashes(strip_tags($_POST['msg'])) : msg('请输入封禁原因');
+    $nextdo = !empty($_POST['nextdo']) ? addslashes(strip_tags($_POST['nextdo'])) : msg('请输入下次封禁日期');
+    $nextdo = strtotime($nextdo);
+    $msg = !empty($_POST['msg']) ? addslashes(strip_tags($_POST['msg'])) : msg('请输入封禁原因');
+    $day = !empty($_POST['day']) ? addslashes(strip_tags($_POST['day'])) : msg('请输入每次封禁天数');
     $portrait = !empty($_POST['portrait']) ? addslashes(strip_tags($_POST['portrait'])) : msg('请输入被封禁人portrait');
     $portrait = explode("\n", trim($portrait));
     $anchor = addslashes(strip_tags($_POST['anchor']));
@@ -117,7 +131,8 @@ if (SYSTEM_PAGE == 'store') {
 //            if(strlen($portrait_i)=="")
             $m->query("UPDATE `" . DB_PREFIX . "wmzz_ban` "
                 . "SET `pid` = '{$pid}', `tieba` = '{$tieba}', `msg` = '{$msg}',"
-                . " `portrait` = '{$portrait_i}', `date` = '{$date}'"
+                . " `portrait` = '{$portrait_i}', `date` = '{$date}', `nextdo` = '{$nextdo}',"
+                . " `day` = '{$day}'"
                 . " WHERE `id` = '{$id}'");
         }
     }
@@ -138,6 +153,16 @@ if (SYSTEM_PAGE == 'store') {
     $msg2 = !empty($_POST['msg2']) ? addslashes(strip_tags($_POST['msg2'])) : "";
     if ((empty($msg) && !empty($msg2)) || (!empty($msg) && empty($msg2))) {
         msg('请正确输入封禁原因');
+    }
+    $nextdo = !empty($_POST['nextdo']) ? addslashes(strip_tags($_POST['nextdo'])) : "";
+    $nextdo2 = !empty($_POST['nextdo2']) ? addslashes(strip_tags($_POST['nextdo2'])) : "";
+    if ((empty($nextdo) && !empty($nextdo2)) || (!empty($nextdo) && empty($nextdo2))) {
+        msg('请正确输入下次封禁日期');
+    }
+    $day = !empty($_POST['day']) ? addslashes(strip_tags($_POST['day'])) : "";
+    $day2 = !empty($_POST['day2']) ? addslashes(strip_tags($_POST['day2'])) : "";
+    if ((empty($day) && !empty($day2)) || (!empty($day) && empty($day2))) {
+        msg('请正确输入每次封禁天数');
     }
     $portrait = !empty($_POST['portrait']) ? addslashes(strip_tags($_POST['portrait'])) : "";
     $portrait2 = !empty($_POST['portrait2']) ? addslashes(strip_tags($_POST['portrait2'])) : "";
@@ -209,6 +234,28 @@ if (SYSTEM_PAGE == 'store') {
         } else {
             $sql1 .= "`msg` = '{$msg2}'";
             $sql2 .= "`msg` = '{$msg}'";
+        }
+        $status = true;
+    }
+    if (!empty($nextdo) && !empty($nextdo2)) {
+        $nextdo=strtotime($nextdo);
+        $nextdo2=strtotime($nextdo2);
+        if ($status) {
+            $sql1 .= ", `nextdo` = '{$nextdo2}'";
+            $sql2 .= " AND `nextdo` = '{$nextdo}'";
+        } else {
+            $sql1 .= "`nextdo` = '{$nextdo2}'";
+            $sql2 .= "`nextdo` = '{$nextdo}'";
+        }
+        $status = true;
+    }
+    if (!empty($day) && !empty($day2)) {
+        if ($status) {
+            $sql1 .= ", `day` = '{$day2}'";
+            $sql2 .= " AND `day` = '{$day}'";
+        } else {
+            $sql1 .= "`day` = '{$day2}'";
+            $sql2 .= "`day` = '{$day}'";
         }
         $status = true;
     }
@@ -316,10 +363,12 @@ if (SYSTEM_PAGE == 'store') {
     $pid = $m->fetch_array($m->query("SELECT `value` FROM `" . DB_PREFIX . "users_options` WHERE `uid` = '" . UID . "' AND `name` = 'wmzz_ban_pid'"));
     $msg = $m->fetch_array($m->query("SELECT `value` FROM `" . DB_PREFIX . "users_options` WHERE `uid` = '" . UID . "' AND `name` = 'wmzz_ban_msg'"));
     $tieba = $m->fetch_array($m->query("SELECT `value` FROM `" . DB_PREFIX . "users_options` WHERE `uid` = '" . UID . "' AND `name` = 'wmzz_ban_tieba'"));
+    $day = $m->fetch_array($m->query("SELECT `value` FROM `" . DB_PREFIX . "users_options` WHERE `uid` = '" . UID . "' AND `name` = 'wmzz_ban_day'"));
     $user_options = [
         'pid' => $pid,
         'msg' => $msg,
         'tieba' => $tieba,
+        'day' => $day,
     ];
     require SYSTEM_ROOT . '/plugins/wmzz_ban/show.php';
     loadfoot();

@@ -27,20 +27,31 @@ $day_list = [
         $('.batchedit').modal("hide");
     });
 
+    const day_list = [
+        <?php foreach ($day_list as $day_i) {
+        echo '"' . $day_i . '",';
+    } ?>
+    ];
+
     function ban_values() {
         const prefix = "banuser_";
 
-        const portrait_html_all = "被封禁人portrait<br/><br/>1.可添加多个<br/><br/>用回车分隔<br/><br/>2.支持直接粘贴<br/><br/>用户主页的url<br/><br/>可以自动提取portrait"
-        document.getElementById(prefix + "pid_info").innerHTML = "选择封禁发起人账号ID [PID]";
+        const portrait_html_all = "被封禁人portrait<br/><br/>1.可添加多个<br/><br/>用回车分隔<br/><br/>2.支持直接粘贴<br/><br/>用户主页的url<br/><br/>可以自动提取portrait";
+        document.getElementById(prefix + "pid_info").innerHTML = "选择封禁发起人百度账号";
         document.getElementById(prefix + "banlistspan").innerHTML = portrait_html_all;
 
-        document.getElementById(prefix + "pid").innerHTML =<?php
-        echo '"<option value=\"' . $pid_checked . '\" selected hidden>' . $pid_checked . '</option>'; ?>
-        <?php foreach ($i['user']['bduss'] as $keyyy => $valueee) {
-            echo '<option value=\"' . $keyyy . '\">' . $keyyy . '</option>';
-        }
-        echo "\"";
-        ?>;
+        document.getElementById(prefix + "pid").innerHTML =
+            "<?php
+                if (empty($pid_checked)) {
+                    echo '<option value=\"' . $pid_checked . '\" selected hidden>' . $pid_checked . '</option>';
+                } else {
+                    echo '<option value=\"' . $pid_checked . '\" selected hidden>' . $i['user']['baidu'][$pid_checked] . '</option>';
+
+                }
+                foreach ($i['user']['bduss'] as $keyyy => $valueee) {
+                    echo '<option value=\"' . $keyyy . '\">' . $i['user']['baidu'][$keyyy] . '</option>';
+                }
+                ?>";
         document.getElementById(prefix + "tieba").setAttribute("value", "<?php echo $tieba;  ?>");
         document.getElementById(prefix + "msg").setAttribute("value", "<?php echo $msg;  ?>");
         document.getElementById(prefix + "portrait").innerHTML = "";
@@ -60,13 +71,13 @@ $day_list = [
         const args = document.getElementById(id).getElementsByTagName("td");
         const names = document.getElementById("bantable").getElementsByTagName("thead")[0]
             .getElementsByTagName("tr")[0].getElementsByTagName("th");
-        const pid_array = [
+        const pid_array = {
             <?php
             foreach ($i['user']['bduss'] as $keyyy => $valueee) {
-                echo '"' . $keyyy . '",';
+                echo '"' . $keyyy . '": "' . $i['user']['baidu'][$keyyy] . '",';
             }
             ?>
-        ];
+        };
         for (let i = 0; i < args.length; i++) {
             if (args[i].id === "use") {
                 if (names[i].id.trim() === "date" && args[i].innerHTML.trim() === "永久") {
@@ -75,27 +86,29 @@ $day_list = [
                     document.getElementById(prefix + names[i].id.trim()).innerText = args[i].innerText.trim();
                 } else if (names[i].id.trim() === "day") {
                     let day_html = "";
-                    day_html += "<option selected hidden value=\"<?php
-                        echo $day . '\\">' . $day;
-                        ?></option>";
-                    <?php
-                    foreach ($day_list as $day_i) {
-                        echo 'day_html += "<option value=\"' . $day_i . '\">' . $day_i . '</option>";';
+                    for (let ii = 0; ii < day_list.length; ii++) {
+                        if (args[i].innerHTML.trim() === day_list[ii]) {
+                            day_html += "<option selected value=\"" + day_list[ii]
+                                + "\">" + day_list[ii] + "</option>";
+                        } else {
+                            day_html += "<option value=\"" + day_list[ii]
+                                + "\">" + day_list[ii] + "</option>";
+                        }
                     }
-                    ?>
                     document.getElementById(prefix + names[i].id.trim()).innerHTML = day_html;
                 } else if (names[i].id.trim() === "pid") {
                     let pid_html = "";
-                    if (pid_array.includes(args[i].innerHTML.trim())) {
-                        document.getElementById(prefix + "pid_info").innerHTML = "选择封禁发起人账号ID [PID]";
-                        pid_html = "<option value=\"" + args[i].innerHTML.trim() + "\" selected hidden>" + args[i].innerHTML.trim() + "</option>";
+                    const pid_cache = args[i].getElementsByTagName("input")[0].getAttribute("value");
+                    if (pid_array.hasOwnProperty(pid_cache)) {
+                        document.getElementById(prefix + "pid_info").innerHTML = "选择封禁发起人百度账号";
+                        pid_html = "<option value=\"" + pid_cache + "\" selected hidden>" + pid_array[pid_cache] + "</option>";
                     } else {
-                        document.getElementById(prefix + "pid_info").innerHTML = "选择封禁发起人账号ID [PID]<br/>（原pid已失效，请重新选择）";
+                        document.getElementById(prefix + "pid_info").innerHTML = "选择封禁发起人百度账号<br/>（原pid已失效，请重新选择）";
                         pid_html = "<option value=\"" + "\" selected hidden>" + "</option>";
                     }
                     <?php
                     foreach ($i['user']['bduss'] as $keyyy => $valueee) {
-                        echo 'pid_html += "<option value=\"' . $keyyy . '\">' . $keyyy . '</option>";';
+                        echo 'pid_html += "<option value=\"' . $keyyy . '\">' . $i['user']['baidu'][$keyyy] . '</option>";';
                     }
                     ?>
                     document.getElementById(prefix + names[i].id.trim()).innerHTML = pid_html;
@@ -112,7 +125,7 @@ $day_list = [
         let pid_html = "<option value=\"" + "\" selected hidden>" + "</option>";
         <?php
         foreach ($i['user']['bduss'] as $keyyy => $valueee) {
-            echo 'pid_html += "<option value=\"' . $keyyy . '\">' . $keyyy . '</option>";';
+            echo 'pid_html += "<option value=\"' . $keyyy . '\">' . $i['user']['baidu'][$keyyy] . '</option>";';
         }
         ?>
         document.getElementById(prefix + "pid_list").innerHTML = pid_html;
@@ -165,14 +178,13 @@ $day_list = [
         <thead>
         <tr>
             <th id="id">ID</th>
-            <th id="pid">PID</th>
+            <th id="pid">百度账号</th>
             <th id="tieba">贴吧</th>
             <th id="portrait">被封禁人portrait</th>
             <th id="msg">封禁原因</th>
             <th id="date">截止日期</th>
             <th id="nextdo">下次封禁</th>
-            <th id="day"
-            ">每次封禁天数</th>
+            <th id="day">每次封禁天数</th>
             <th id="edituser_button">修改</th>
             <th id="deluser_button">删除</th>
         </tr>
@@ -184,7 +196,10 @@ $day_list = [
             ?>
             <tr id="baneduser<?php echo $v['id'] ?>">
                 <td id="use"><?php echo $v['id'] ?></td>
-                <td id="use"><?php echo $v['pid'] ?></td>
+                <td id="use">
+                    <input type="hidden" disabled value="<?php echo $v['pid'] ?>">
+                    <?php echo $i['user']['baidu'][$v['pid']] ?>
+                </td>
                 <td id="use"><?php echo $v['tieba'] ?></td>
                 <?php
                 echo '<td id="use"><a href="http://tieba.baidu.com/home/main?id=' . $v['portrait'] . '&fr=pb' . '" target="_blank">' . $v['portrait'] . '</td>';
@@ -235,15 +250,14 @@ $day_list = [
                 </td>
             </tr>
             <tr>
-                <td>添加封禁时默认执行封禁的id</td>
+                <td>添加封禁时默认执行封禁的百度账号</td>
                 <td><select name="pid" class="form-control" id="pid">
                         <option value=""></option><?php
-                        echo '<option value=""></option>';
                         foreach ($i['user']['bduss'] as $keyyy => $valueee) {
                             if ($keyyy == $pid) {
-                                echo '<option selected value="' . $keyyy . '">' . $keyyy . '</option>';
+                                echo '<option selected value="' . $keyyy . '">' . $i['user']['baidu'][$keyyy] . '</option>';
                             } else {
-                                echo '<option value="' . $keyyy . '">' . $keyyy . '</option>';
+                                echo '<option value="' . $keyyy . '">' . $i['user']['baidu'][$keyyy] . '</option>';
                             }
                         } ?></select></td>
             </tr>
@@ -292,7 +306,7 @@ $day_list = [
                     <br/>
                     <div class="input-group">
                                         <span class="input-group-addon"
-                                              id="banuser_pid_info">选择封禁发起人账号ID [PID]</span>
+                                              id="banuser_pid_info">选择封禁发起人百度账号</span>
                         <select name="pid" class="form-control" id="banuser_pid">
 
                         </select>
@@ -362,7 +376,7 @@ $day_list = [
                     </div>
                     <br/>
                     <div class="input-group">
-                        <span class="input-group-addon" id="edituser_pid_info">选择封禁发起人账号ID [PID]</span>
+                        <span class="input-group-addon" id="edituser_pid_info">选择封禁发起人百度账号</span>
                         <select name="pid" class="form-control" id="edituser_pid">
 
                         </select>
@@ -436,7 +450,7 @@ $day_list = [
                     <br/>
                     <br/>
                     <div class="input-group">
-                        <span class="input-group-addon" id="batchedit_pid_info">要修改的封禁发起人账号ID [PID]<br/><br/>支持搜索，下拉框选择和手动输入的值</span>
+                        <span class="input-group-addon" id="batchedit_pid_info">要修改的封禁发起人百度账号<br/><br/>支持搜索，下拉框选择和手动输入的值</span>
                         <input name="pid" type="text" list="batchedit_pid_list" class="form-control"
                                id="batchedit_pid" value="">
                         <datalist id="batchedit_pid_list">
@@ -513,5 +527,5 @@ $day_list = [
 
 <br/><br/>管理员设置的循环封禁理由：<?php echo $msg ?>
 <br/><br/>管理员设置的默认封禁的贴吧：<?php echo $tieba ?>
-<br/><br/>管理员设置的默认执行封禁的id：<?php echo $pid_checked ?>
+<br/><br/>管理员设置的默认执行封禁的百度账号：<?php echo $i['user']['baidu'][$pid_checked] ?>
 <br/><br/>作者：<a href="http://zhizhe8.net" target="_blank">无名智者</a>

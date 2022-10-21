@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: 循环封禁
-Version: 1.5
+Version: 1.6
 Plugin URL: http://zhizhe8.net
 Description: 可以对指定用户进行循环封禁的插件，支持永久封禁和限时封禁
 Author: 无名智者

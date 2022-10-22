@@ -9,41 +9,27 @@ if (SYSTEM_PAGE == 'store') {
     $tieba = addslashes(strip_tags($_POST['tieba']));
     $day = addslashes(strip_tags($_POST['day']));
     $anchor = addslashes(strip_tags($_POST['anchor']));
-    $user_options = [
-        'pid' => $m->fetch_array($m->query("SELECT 1 FROM `" . DB_PREFIX . "users_options` WHERE `uid` = '" . UID . "' AND `name` = 'wmzz_ban_pid' LIMIT 1")),
-        'msg' => $m->fetch_array($m->query("SELECT 1 FROM `" . DB_PREFIX . "users_options` WHERE `uid` = '" . UID . "' AND `name` = 'wmzz_ban_msg' LIMIT 1")),
-        'tieba' => $m->fetch_array($m->query("SELECT 1 FROM `" . DB_PREFIX . "users_options` WHERE `uid` = '" . UID . "' AND `name` = 'wmzz_ban_tieba' LIMIT 1")),
-        'day' => $m->fetch_array($m->query("SELECT 1 FROM `" . DB_PREFIX . "users_options` WHERE `uid` = '" . UID . "' AND `name` = 'wmzz_ban_day' LIMIT 1")),
-    ];
-    if (empty($user_options['pid'])) {
-        $m->query("INSERT INTO `" . DB_PREFIX . "users_options` (`uid`, `name` , `value`)"
-            . " values ('" . UID . "','wmzz_ban_pid','" . $pid . "')");
-    } else {
-        $m->query("UPDATE `" . DB_PREFIX . "users_options` SET `value` = '" . $pid
-            . "' WHERE `uid` = '" . UID . "' AND `name` = 'wmzz_ban_pid'");
-    }
-    if (empty($user_options['msg'])) {
-        $m->query("INSERT INTO `" . DB_PREFIX . "users_options` (`uid`, `name` , `value`)"
-            . " values ('" . UID . "','wmzz_ban_msg','" . $msg . "')");
-    } else {
-        $m->query("UPDATE `" . DB_PREFIX . "users_options` SET `value` = '" . $msg
-            . "' WHERE `uid` = '" . UID . "' AND `name` = 'wmzz_ban_msg'");
-    }
-    if (empty($user_options['tieba'])) {
-        $m->query("INSERT INTO `" . DB_PREFIX . "users_options` (`uid`, `name` , `value`)"
-            . " values ('" . UID . "','wmzz_ban_tieba','" . $tieba . "')");
-    } else {
-        $m->query("UPDATE `" . DB_PREFIX . "users_options` SET `value` = '" . $tieba
-            . "' WHERE `uid` = '" . UID . "' AND `name` = 'wmzz_ban_tieba'");
-    }
-    if (empty($user_options['day'])) {
-        $m->query("INSERT INTO `" . DB_PREFIX . "users_options` (`uid`, `name` , `value`)"
-            . " values ('" . UID . "','wmzz_ban_day','" . $day . "')");
-    } else {
-        $m->query("UPDATE `" . DB_PREFIX . "users_options` SET `value` = '" . $day
-            . "' WHERE `uid` = '" . UID . "' AND `name` = 'wmzz_ban_day'");
-    }
+    option::uset("wmzz_ban_pid", $pid, UID);
+    option::uset("wmzz_ban_msg", $msg, UID);
+    option::uset("wmzz_ban_tieba", $tieba, UID);
+    option::uset("wmzz_ban_day", $day, UID);
     ReDirect(SYSTEM_URL . 'index.php?plugin=wmzz_ban&ok' . '#' . $anchor);
+} else if (SYSTEM_PAGE == 'save') {
+    ob_end_clean();
+    $data = json_decode($_POST['info'], true);
+    $cache_wmzz_ban_enable = "";
+    if (!empty($data['wmzz_ban_enable'])) {
+        $cache_wmzz_ban_enable = addslashes(strip_tags($data['wmzz_ban_enable']));
+    }
+    if (empty($cache_wmzz_ban_enable)
+    ) {
+        $return_arr = array('code' => 0, 'msg' => '无效请求!');
+    } else {
+        option::uset('wmzz_ban_enable', $cache_wmzz_ban_enable, UID);
+        $return_arr = array('code' => 1, 'msg' => '保存成功!');
+    }
+    echo json_encode($return_arr);
+    die;
 } else if (SYSTEM_PAGE == 'add') {
     $pid = !empty($_POST['pid']) ? intval($_POST['pid']) : msg('请选择PID');
     if (!isset($i['user']['bduss'][$pid])) {
@@ -361,16 +347,6 @@ if (SYSTEM_PAGE == 'store') {
     ReDirect(SYSTEM_URL . 'index.php?plugin=wmzz_ban&ok' . '#' . $anchor);
 } else {
     loadhead();
-    $pid = $m->fetch_array($m->query("SELECT `value` FROM `" . DB_PREFIX . "users_options` WHERE `uid` = '" . UID . "' AND `name` = 'wmzz_ban_pid'"));
-    $msg = $m->fetch_array($m->query("SELECT `value` FROM `" . DB_PREFIX . "users_options` WHERE `uid` = '" . UID . "' AND `name` = 'wmzz_ban_msg'"));
-    $tieba = $m->fetch_array($m->query("SELECT `value` FROM `" . DB_PREFIX . "users_options` WHERE `uid` = '" . UID . "' AND `name` = 'wmzz_ban_tieba'"));
-    $day = $m->fetch_array($m->query("SELECT `value` FROM `" . DB_PREFIX . "users_options` WHERE `uid` = '" . UID . "' AND `name` = 'wmzz_ban_day'"));
-    $user_options = [
-        'pid' => $pid,
-        'msg' => $msg,
-        'tieba' => $tieba,
-        'day' => $day,
-    ];
     require SYSTEM_ROOT . '/plugins/wmzz_ban/show.php';
     loadfoot();
 }

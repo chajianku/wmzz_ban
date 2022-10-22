@@ -40,8 +40,9 @@ function callback_inactive()
 function callback_remove()
 {
     global $m;
-    $m->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "wmzz_ban`");
     option::del('plugin_wmzz_ban');
+    $m->query("DELETE FROM `" . DB_PREFIX . "users_options` WHERE `name` = 'wmzz_ban_enable'");
+    $m->query("DROP TABLE IF EXISTS `" . DB_PREFIX . "wmzz_ban`");
     $m->query("DELETE FROM `" . DB_PREFIX . "users_options`"
         . " WHERE `name` = 'wmzz_ban_msg'");
     $m->query("DELETE FROM `" . DB_PREFIX . "users_options`"

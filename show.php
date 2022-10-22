@@ -1,16 +1,27 @@
 <?php if (!defined('SYSTEM_ROOT')) {
     die('Insufficient Permissions');
 }
-global $m, $i, $user_options;
+global $m, $i;
+$is_open = option::uget('wmzz_ban_enable', UID);
+if (!$is_open) {
+    option::uset('wmzz_ban_enable', 'on', UID);
+    $is_open = true;
+} else {
+    if ($is_open == "on") {
+        $is_open = true;
+    } else if ($is_open == "off") {
+        $is_open = false;
+    }
+}
 
 if (isset($_GET['ok'])) {
     echo '<div class="alert alert-success">设置保存成功</div>';
 }
 
-$msg = array_key_exists('value', $user_options['msg']) ? $user_options['msg']['value'] : '';
-$tieba = array_key_exists('value', $user_options['tieba']) ? $user_options['tieba']['value'] : '';
-$day = array_key_exists('value', $user_options['day']) ? $user_options['day']['value'] : '';
-$pid = array_key_exists('value', $user_options['pid']) ? $user_options['pid']['value'] : '';
+$msg = option::uget("wmzz_ban_msg", UID) ? option::uget("wmzz_ban_msg", UID) : '';
+$tieba = option::uget("wmzz_ban_tieba", UID) ? option::uget("wmzz_ban_tieba", UID) : '';
+$day = option::uget("wmzz_ban_day", UID) ? option::uget("wmzz_ban_day", UID) : '';
+$pid = option::uget("wmzz_ban_pid", UID) ? option::uget("wmzz_ban_pid", UID) : '';
 $pid_checked = array_key_exists($pid, $i['user']['bduss']) ? $pid : '';
 
 $day_list = [
@@ -18,6 +29,7 @@ $day_list = [
     '3',
     '10',
 ];
+
 ?>
 
 <script type="text/javascript">
@@ -141,11 +153,93 @@ $day_list = [
         document.getElementById(prefix + "day2").innerHTML = day_html;
 
     }
+
+    function save_event(id, id2) {
+        $('#' + id2).attr('disabled', true);
+        $('#' + id2).text('正在保存');
+        const args = document.getElementById(id).getElementsByTagName("tr");
+
+        let data = {};
+        for (let i = 0; i < args.length; i++) {
+            if (args[i].id.trim() === "wmzz_ban_enable") {
+                let is_open = true;
+                const tds = args[i].getElementsByTagName("td")
+                for (let ii = 0; ii < tds.length; ii++) {
+                    if (tds[ii].id.trim() === "values") {
+                        const radios = tds[ii].getElementsByTagName("input");
+                        for (let iii = 0; iii < radios.length; iii++) {
+                            if (radios[iii].name === "wmzz_ban_enable"
+                                && radios[iii].checked
+                            ) {
+                                is_open = radios[iii].value;
+                            }
+                        }
+                    }
+                }
+
+                data["wmzz_ban_enable"] = is_open;
+            }
+        }
+        $.ajax({
+            url: 'index.php?plugin=wmzz_ban&mod=save',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                info: JSON.stringify(data),
+            },
+            success: function (result) {
+                switch (result.code) {
+                    case 1:
+                        document.getElementById("head").innerHTML =
+                            '<div class="alert alert-success alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>' + result.msg + '</div>';
+                        break;
+                    case 0:
+                        document.getElementById("head").innerHTML =
+                            '<div class="alert alert-danger alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>' + result.msg + '</div>';
+                        break;
+                    default:
+                        alert('请求异常!请刷新页面后重试');
+                        break;
+                }
+                $('#' + id2).attr('disabled', false);
+                $('#' + id2).text('保存设定');
+            },
+            error: function () {
+                alert('网络异常!请刷新页面后重试');
+                $('#' + id2).attr('disabled', false);
+                $('#' + id2).text('保存设定');
+            }
+        });
+    }
 </script>
+
+<div id="head"></div>
 
 <h2>贴吧循环封禁</h2>
 
 <br/>
+
+<table class="table table-striped" id="user_settings">
+    <tr id="wmzz_ban_enable">
+        <td>是否开启循环封禁</td>
+        <td id="values">
+            <input type="radio" name="wmzz_ban_enable"
+                   value="on" <?php echo $is_open ? 'checked' : ''; ?> >开启<br/>
+            <input type="radio" name="wmzz_ban_enable"
+                   value="off" <?php echo $is_open ? '' : 'checked'; ?> >关闭
+
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <a id="save_button" style="float: right"
+               onclick="save_event('user_settings','save_button')"
+               href="javascript:void(0)" class="btn btn-primary">
+                保存设定
+            </a>
+        </td>
+    </tr>
+</table>
 
 <!-- NAVI -->
 <ul class="nav nav-tabs" id="PageTab">

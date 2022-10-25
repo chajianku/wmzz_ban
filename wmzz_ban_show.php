@@ -72,7 +72,7 @@ if (SYSTEM_PAGE == 'store') {
                 . " WHERE `uid` = '" . UID . "' AND `pid` = '{$pid}' AND `tieba` = '{$tieba}'"
                 . " AND `portrait` = '{$portrait_i}' AND `msg` = '{$msg}' AND `date` = '{$date}' AND `day` = '{$day}' LIMIT 1"
             ));
-            if (!is_null($exists)) {
+            if (is_null($exists)) {
                 $m->query("INSERT INTO `" . DB_PREFIX . "wmzz_ban` (`uid`, `pid`, `tieba`, `portrait`, `msg` , `date`, `day` , `nextdo`)"
                     . " VALUES ('" . UID . "', '{$pid}', '{$tieba}', '{$portrait_i}', '{$msg}', '{$date}', '{$day}', '{$now}')");
             }

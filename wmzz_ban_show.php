@@ -67,11 +67,15 @@ if (SYSTEM_PAGE == 'store') {
             }
 //            if(strlen($portrait_i)=="")
             $now = strtotime(date('Y-m-d'));
-            $m->query("INSERT INTO `" . DB_PREFIX . "wmzz_ban` (`uid`, `pid`, `tieba`, `portrait`, `msg` , `date`, `day` , `nextdo`)"
-                . " SELECT '" . UID . "', '{$pid}', '{$tieba}', '{$portrait_i}', '{$msg}', '{$date}', '{$day}', '{$now}'"
-                . " WHERE NOT EXISTS ( SELECT * FROM `" . DB_PREFIX . "wmzz_ban`"
+            $exists = $m->fetch_array($m->query(
+                "SELECT * FROM `" . DB_PREFIX . "wmzz_ban`"
                 . " WHERE `uid` = '" . UID . "' AND `pid` = '{$pid}' AND `tieba` = '{$tieba}'"
-                . " AND `portrait` = '{$portrait_i}' AND `msg` = '{$msg}' AND `date` = '{$date}' AND `day` = '{$day}')");
+                . " AND `portrait` = '{$portrait_i}' AND `msg` = '{$msg}' AND `date` = '{$date}' AND `day` = '{$day}' LIMIT 1"
+            ));
+            if (!is_null($exists)) {
+                $m->query("INSERT INTO `" . DB_PREFIX . "wmzz_ban` (`uid`, `pid`, `tieba`, `portrait`, `msg` , `date`, `day` , `nextdo`)"
+                    . " VALUES ('" . UID . "', '{$pid}', '{$tieba}', '{$portrait_i}', '{$msg}', '{$date}', '{$day}', '{$now}')");
+            }
         }
     }
     ReDirect(SYSTEM_URL . 'index.php?plugin=wmzz_ban&ok' . '#' . $anchor);

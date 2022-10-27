@@ -84,11 +84,14 @@ function cron_wmzz_ban()
                     $m->query("UPDATE `" . DB_PREFIX . "wmzz_ban` SET `nextdo` = '{$next}' WHERE `id` = '{$x['id']}'");
                     $log .= "封禁成功" . PHP_EOL;
                 } else {
-                    $log .= "封禁失败, 原因为\"" . $res['errmsg'] . "\"" . PHP_EOL;
+                    $next = $now + ($r * 86400);
+                    $m->query("UPDATE `" . DB_PREFIX . "wmzz_ban` SET `nextdo` = '{$next}' WHERE `id` = '{$x['id']}'");
+                    $log .= "封禁失败, 原因为\"" . $res['errno'] . ", " . $res['errmsg'] . "\"" . PHP_EOL;
                 }
 //            else if ($res['errno'] == 74) {    //用户名不存在   224011 需要验证码
 //                $m->query("DELETE FROM `" . DB_PREFIX . "wmzz_ban` WHERE `id` = '{$x['id']}'");
 //            }
+                usleep(250000);
             } else {
                 $m->query("DELETE FROM `" . DB_PREFIX . "wmzz_ban` WHERE `id` = '{$x['id']}'");
             }
